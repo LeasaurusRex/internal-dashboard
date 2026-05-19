@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+  tools       Tool[]
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String     @unique
+  role         String
+  active       Boolean    @default(true)
+  joinedAt     DateTime
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  userTools    UserTool[]
+}
+
+model Tool {
+  id                  Int        @id @default(autoincrement())
+  name                String
+  description         String?
+  vendor              String?
+  category            String
+  monthlyCost         Decimal    @default(0)
+  previousMonthCost   Decimal?
+  status              String
+  websiteUrl          String?
+  iconUrl             String?
+  activeUsersCount    Int        @default(0)
+  ownerDepartmentId   Int
+ownerDepartment     Department @relation(fields: [ownerDepartmentId], references: [id])
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  userTools           UserTool[]
+}
+
+model UserTool {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  toolId           Int
+  usageFrequency   String
+  lastUsed         DateTime
+  proficiencyLevel String
+  user             User     @relation(fields: [userId], references: [id])
+  tool             Tool     @relation(fields: [toolId], references: [id])
+
+  @@unique([userId, toolId])
+}
